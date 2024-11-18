@@ -13,7 +13,7 @@ const Navbar = () => {
                 {/* Logo */}
                 <div className="text-white text-2xl font-semibold">
                     <a href="/" className="flex items-center">
-                        <img src="/logo.png" alt="Logo" className="w-8 h-8 mr-2" />
+                        <img src="#" alt="Logo" className="w-8 h-8 mr-2" />
                         <span>NextForm</span>
                     </a>
                 </div>
@@ -27,7 +27,7 @@ const Navbar = () => {
                     <div className="relative">
                         <button className="flex items-center text-white hover:text-gray-200">
                             <img
-                                src="/profile.jpg"
+                                src="#"
                                 alt="User Profile"
                                 className="w-8 h-8 rounded-full mr-2"
                             />
@@ -70,7 +70,7 @@ const Navbar = () => {
                 <div className="mt-4">
                     <button className="flex items-center text-white mx-auto">
                         <img
-                            src="/profile.jpg"
+                            src="#"
                             alt="User Profile"
                             className="w-8 h-8 rounded-full mr-2"
                         />

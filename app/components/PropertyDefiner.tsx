@@ -11,7 +11,6 @@ function PropertyDefiner() {
 
         const index = currentElement.index;
 
-        // Update the specific form element in the context array
         setNextFormElements((prev) => {
             const newElements = [...prev];
             newElements[index] = {
@@ -21,7 +20,6 @@ function PropertyDefiner() {
             return newElements;
         });
 
-        // Also update the currentElement for immediate effect
         setCurrentElement({
             ...currentElement,
             element: {
@@ -30,8 +28,6 @@ function PropertyDefiner() {
             },
         });
     };
-
-    console.log(currentElement)
 
     if (!currentElement) {
         return (
@@ -45,13 +41,12 @@ function PropertyDefiner() {
     }
 
     return (
-        <div className="p-6 bg-white rounded-lg  w-full max-w-2xl mx-auto">
-            <div className="flex justify-start gap-4">
-                <div className="badges  bg-black text-white text-center w-9 h-9 flex justify-center items-center ">
+        <div className="p-6 bg-white rounded-lg w-full max-w-2xl mx-auto">
+            <div className="flex justify-start gap-4 mb-4">
+                <div className="badges bg-black text-white text-center w-9 h-9 flex justify-center items-center">
                     {currentElement.index + 1}
                 </div>
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Define Element Properties</h2>
-
+                <h2 className="text-2xl font-semibold text-gray-800">Define Element Properties</h2>
             </div>
 
             {/* Name Input */}
@@ -61,7 +56,7 @@ function PropertyDefiner() {
                     type="text"
                     value={currentElement.element.name || ''}
                     onChange={(e) => handleChange('name', e.target.value)}
-                    className="w-full p-3 border-b-2 border-gray-300 rounded-md  "
+                    className="w-full border-b-2 border-gray-300"
                     placeholder="Enter a unique name for the element"
                 />
             </div>
@@ -73,25 +68,40 @@ function PropertyDefiner() {
                     type="text"
                     value={currentElement.element.label || ''}
                     onChange={(e) => handleChange('label', e.target.value)}
-                    className="w-full p-3 border-b-2 border-gray-300 rounded-md  "
+                    className="w-full border-b-2 border-gray-300"
                     placeholder="Enter label for the element"
                 />
             </div>
+
+            {/* value input */}
+            
+            {/* <div className="mb-5">
+                <label className="block text-gray-700 text-sm font-medium mb-2">Value:</label>
+                <input
+                    type="text"
+                    readOnly
+                    value={currentElement.element.value || ''}
+                    className="w-full border-b-2 border-gray-300"
+                />
+            </div> */}
 
             {/* Type Selector */}
             <div className="mb-5">
                 <label className="block text-gray-700 text-sm font-medium mb-2">Type:</label>
                 <select
-                    value={currentElement.element.type || ''}
+                    value={currentElement.element.type || NextFormElementType.SHORT_PARAGRAPH}
                     onChange={(e) => handleChange('type', e.target.value)}
-                    className="w-full p-3 border-b-2 border-gray-300 rounded-md  "
+                    className="w-full border-b-2 border-gray-300"
                 >
-                    {
-                        Object.keys(NextFormElementType).map((key) => {
-                            const parseKey = key.replace('_', ' ').toUpperCase();
-                            return <option key={key} value={key}>{parseKey}</option>
-                        })
-                    }
+                    {Object.keys(NextFormElementType).map((key) => {
+                        const value = NextFormElementType[key as keyof typeof NextFormElementType];
+                        const parseKey = key.replace(/_/g, ' ').toUpperCase();
+                        return (
+                            <option key={value} value={value}>
+                                {parseKey}
+                            </option>
+                        );
+                    })}
                 </select>
             </div>
 
@@ -104,12 +114,12 @@ function PropertyDefiner() {
                         ...currentElement.element.constraints,
                         required: e.target.checked,
                     })}
-                    className="mr-2 h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="mr-2 h-5 w-5"
                 />
                 <label className="text-gray-700 text-sm font-medium">Required</label>
             </div>
 
-            {/* Min and Max Constraints (Only for number type) */}
+            {/* Constraints for Numbers */}
             {currentElement.element.type === NextFormElementType.NUMBER && (
                 <>
                     <div className="mb-5">
@@ -121,10 +131,9 @@ function PropertyDefiner() {
                                 ...currentElement.element.constraints,
                                 min: Number(e.target.value),
                             })}
-                            className="w-full p-3 border border-gray-300 rounded-md  "
+                            className="w-full border-b-2 border-gray-300"
                         />
                     </div>
-
                     <div className="mb-5">
                         <label className="block text-gray-700 text-sm font-medium mb-2">Max Value:</label>
                         <input
@@ -134,25 +143,57 @@ function PropertyDefiner() {
                                 ...currentElement.element.constraints,
                                 max: Number(e.target.value),
                             })}
-                            className="w-full p-3 border border-gray-300 rounded-md  "
+                            className="w-full border-b-2 border-gray-300"
                         />
                     </div>
                 </>
             )}
 
-            {/* Pattern Constraint (Only for text types) */}
-            {currentElement.element.type === NextFormElementType.SHORT_PARAGRAPH && (
+            {/* Checkbox Group Constraints */}
+            {(currentElement.element.type === NextFormElementType.CHECKBOX_GROUP) && (
+                <>
+                    <div className="mb-5">
+                        <label className="block text-gray-700 text-sm font-medium mb-2">Min Selections:</label>
+                        <input
+                            type="number"
+                            value={currentElement.element.constraints?.minSelected || ''}
+                            onChange={(e) => handleChange('constraints', {
+                                ...currentElement.element.constraints,
+                                minSelected: Number(e.target.value),
+                            })}
+                            className="w-full border-b-2 border-gray-300"
+                            placeholder="Minimum number of checkboxes to select"
+                        />
+                    </div>
+                    <div className="mb-5">
+                        <label className="block text-gray-700 text-sm font-medium mb-2">Max Selections:</label>
+                        <input
+                            type="number"
+                            value={currentElement.element.constraints?.maxSelected || ''}
+                            onChange={(e) => handleChange('constraints', {
+                                ...currentElement.element.constraints,
+                                maxSelected: Number(e.target.value),
+                            })}
+                            className="w-full border-b-2 border-gray-300"
+                            placeholder="Maximum number of checkboxes to select"
+                        />
+                    </div>
+                </>
+            )}
+
+            {/* Options Input (for select, radio, checkbox) */}
+            {['checkbox_group', 'radio_group', 'select'].includes(currentElement.element.type.toLowerCase()) && (
                 <div className="mb-5">
-                    <label className="block text-gray-700 text-sm font-medium mb-2">Pattern (Regex):</label>
+                    <label className="block text-gray-700 text-sm font-medium mb-2">Options (comma-separated):</label>
                     <input
                         type="text"
-                        value={currentElement.element.constraints?.pattern || ''}
-                        onChange={(e) => handleChange('constraints', {
-                            ...currentElement.element.constraints,
-                            pattern: e.target.value,
-                        })}
-                        className="w-full p-3 border-b-2 border-gray-300 rounded-md shadow-sm "
-                        placeholder="Enter regex pattern"
+                        value={currentElement.element.options || ''}
+                        onChange={(e) => {
+                            const options = e.target.value.trim().split(',').map((option) => option.trim());
+                            handleChange('options', options)
+                        }}
+                        className="w-full border-b-2 border-gray-300"
+                        placeholder="Enter options, separated by commas"
                     />
                 </div>
             )}

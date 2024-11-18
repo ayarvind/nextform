@@ -32,7 +32,6 @@ export default function Index() {
           {/* Main Canvas Section */}
           <main className="flex-1 p-6">
             <div className="bg-white  p-6 h-full overflow-auto">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">Canvas</h2>
               <Canvas />
             </div>
           </main>
