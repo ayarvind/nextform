@@ -4,20 +4,49 @@ import Alert from '~/utils/Alert';
 
 function CreateElement({
     nextFormElement,
+    index,
+    setNextFormElements
 }: {
     nextFormElement: NextFormElement;
+    index: number;
+    setNextFormElements: React.Dispatch<React.SetStateAction<NextFormElement[]>>;
 }) {
     const [value, setValue] = useState<string | string[]>(nextFormElement.value || '');
+    const [files, setFiles] = useState<FileList | null>(null);
     // const [alert, setAlert] = useState<AlertProps | null>(null);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setValue(event.target.value);
+        setNextFormElements((prev) => {
+            const newElements = [...prev];
+            newElements[index] = {
+                ...newElements[index],
+                value: event.target.value
+            };
+            return newElements;
+        })
+
     };
 
-    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(event.target.checked ? 'true' : 'false');
-    };
 
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setFiles(event.target.files);
+            setNextFormElements((prev) => {
+                const newElements = [...prev];
+                newElements[index] = {
+                    ...newElements[index],
+                    files: Array.from(event.target.files || []),
+                    value : undefined
+                };
+                return newElements;
+            }) 
 
+          
+
+        } else {
+            setFiles(null)
+        }
+    }
     console.log('NextFormElement:', nextFormElement);
 
     return (
@@ -36,14 +65,13 @@ function CreateElement({
             {/* Render different input types based on nextFormElement.type */}
             {(() => {
                 switch (nextFormElement.type) {
-                    case NextFormElementType.SHORT_PARAGRAPH:
+                    case NextFormElementType.SHORT_ANSWER:
                     case NextFormElementType.URL:
                     case NextFormElementType.NUMBER:
                     case NextFormElementType.DATE:
                     case NextFormElementType.PASSWORD:
                     case NextFormElementType.TIME:
                     case NextFormElementType.EMAIL:
-                    case NextFormElementType.FILE:
                         return (
                             <input
                                 type={nextFormElement.type}
@@ -54,18 +82,18 @@ function CreateElement({
                                 min={nextFormElement.constraints?.min}
                                 max={nextFormElement.constraints?.max}
                                 pattern={nextFormElement.constraints?.pattern}
-                                className="w-full border-b bg-slate-50 mt-2 border-gray-500"
+                                className="w-full  p-1 border-b bg-slate-50 mt-2 border-gray-500"
                             />
                         );
 
-                    case NextFormElementType.LONG_PARAGRAPH:
+                    case NextFormElementType.PARAGRAPH:
                         return (
                             <textarea
                                 value={value}
                                 onChange={handleChange}
                                 placeholder={nextFormElement.label}
                                 required={nextFormElement.constraints?.required}
-                                className="w-full h-32 border-b bg-slate-50 mt-2 border-gray-500"
+                                className="w-full p-1 h-32 border-b bg-slate-50 mt-2 border-gray-500"
                             />
                         );
 
@@ -73,10 +101,14 @@ function CreateElement({
                     case NextFormElementType.SELECT:
                         return (
                             <select
+
+                                multiple={
+                                    nextFormElement.constraints?.multiple ? true : false
+                                }
                                 value={value}
                                 onChange={handleChange}
                                 required={nextFormElement.constraints?.required}
-                                className="w-full border-b bg-slate-50 mt-2 border-gray-500"
+                                className="w-full p-1 border-b bg-slate-50 mt-2 border-gray-500"
                             >
                                 {nextFormElement.options?.map((option, index) => (
                                     <option key={index} value={option}>
@@ -131,7 +163,7 @@ function CreateElement({
                     case NextFormElementType.RADIO_GROUP:
                         return (
                             <>
-                              
+
                                 {
 
                                     nextFormElement.options?.map((option, index) => (
@@ -162,15 +194,30 @@ function CreateElement({
                                 }
                             </>
                         )
-                    default:
+                    case NextFormElementType.FILE:
                         return (
                             <input
-                                type="text"
-                                value={value}
-                                onChange={handleChange}
-                                placeholder={nextFormElement.label}
-                                className="w-full border-b bg-slate-50 mt-2 border-gray-500"
+                                type="file"
+                                onChange={handleFileChange}
+                                required={nextFormElement.constraints?.required}
+                                accept={nextFormElement.constraints?.fileTypes?.join(',')}
+                                multiple={nextFormElement.constraints?.multiple}
+                                className="w-full p-1 border-b bg-slate-50 mt-2 border-gray-500"
                             />
+                        );
+                    default:
+                        return (
+                            <>
+                                <input 
+                                    type="file" 
+                                    onChange={handleFileChange} 
+                                    required={nextFormElement.constraints?.required} 
+                                    accept={nextFormElement.constraints?.fileTypes?.join(',')} 
+                                    multiple={nextFormElement.constraints?.multiple} 
+                                    className="w-full border-b bg-slate-50 mt-2 border-gray-500"
+                                    />
+                                
+                            </>
                         );
                 }
             })()}

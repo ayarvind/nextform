@@ -1,32 +1,38 @@
 
 import { createContext, useState } from "react";
 import NewElement from "./NewElement";
-import { RiArrowDownSLine, RiArrowUpSLine, RiCloseCircleLine, RiCrossLine, RiDeleteBackLine, RiDeleteBin2Line, RiDeleteBin3Line } from "@remixicon/react";
-import { NextFormElement } from "~/types/NextFormElement";
+import { RiCloseCircleLine, RiCrossLine, RiDeleteBackLine, RiDeleteBin2Line, RiDeleteBin3Line } from "@remixicon/react";
 import { useNextFormContext } from "~/context/useNextFormContext";
 import CreateElement from "./CreateElement";
 import { useNextFormPropsDefiner } from "~/context/useNextFormPropsDefiner";
+import { NextFormElement } from "~/types/NextFormElement";
 function Canvas(): React.ReactElement {
     const { nextFormElements, setNextFormElements } = useNextFormContext();
     const { currentElement, setCurrentElement } = useNextFormPropsDefiner();
     const [swapIdx1, setSwapIdx1] = useState<number | undefined>(undefined);
     const [swapIdx2, setSwapIdx2] = useState<number | undefined>(undefined);
-    const removeElement = (index: number) => {
-        // close the property definer if the element is removed
-
-        if (currentElement && currentElement.index == index) {
-            setCurrentElement(undefined);
-        }
-        const newElements = [...nextFormElements];
-        newElements.splice(index, 1);
+    const removeElement = (elementId: number) => {
+       
+        const newElements = nextFormElements.filter((element) => element.elementId !== elementId);
         setNextFormElements(newElements);
-    }
+      
+    };
 
-    const swapElements = (index1: number, index2: number) => {
+    const swapElements = (elementId1: number, elementId2: number) => {
+
+        const element1 = nextFormElements.find((element) => {
+            return element.elementId == elementId1
+        });
+        const element2 = nextFormElements.find((element) => {
+            return element.elementId == elementId2
+        });;
+        const index1 = nextFormElements.indexOf(element1!);
+        const index2 = nextFormElements.indexOf(element2!);
+        console.log(index1,index2)
         const newElements = [...nextFormElements];
-        const temp = newElements[index1 - 1];
-        newElements[index1 - 1] = newElements[index2 - 1];
-        newElements[index2 - 1] = temp;
+        const temp = newElements[index1];
+        newElements[index1] = newElements[index2];
+        newElements[index2] = temp;
         setNextFormElements(newElements);
 
     }
@@ -46,20 +52,22 @@ function Canvas(): React.ReactElement {
                         {/* Swap section */}
                         <input
                             type='number'
+                            placeholder="1"
                             min={1}
                             onChange={(e) => { setSwapIdx1(parseInt(e.target.value)) }}
                             max={nextFormElements.length}
-                            className="w-10  bg-slate-50  text-center border-gray-300 px-2 py-1"
+                            className="w-20  bg-slate-50  text-center border-gray-300 px-2 py-1"
                         />
 
 
 
                         <input
                             type='number'
+                            placeholder="2"
                             min={1}
                             onChange={(e) => { setSwapIdx2(parseInt(e.target.value)) }}
                             max={nextFormElements.length}
-                            className="w-10 border-l-2 text-center border-gray-300 px-2 py-1 "
+                            className="w-20 border-l-2 text-center border-gray-300 px-2 py-1 "
                         />
 
                         <button onClick={() => {
@@ -73,25 +81,32 @@ function Canvas(): React.ReactElement {
 
                 <form>
                     {
+
                         nextFormElements.map((element, index) => (
-                            <div onClick={() => {
+                            <div key={element.elementId} onClick={() => {
                                 setCurrentElement({
                                     element,
                                     index: index
                                 });
-                            }} key={index} className="flex justify-between items-start p-3 bg-white gap-3" style={{
+                            }} className="flex justify-between items-start p-3 bg-white gap-3" style={{
                                 border: `1px solid #e5e7eb`,
                             }}>
                                 <div className="badges  bg-black text-white text-center w-9 h-9 flex justify-center items-center ">
-                                    {index + 1}
+                                    {
+                                        element.elementId ? element.elementId : index + 1
+                                    }
                                 </div>
 
                                 <div className="w-[90%]" >
-                                    <CreateElement nextFormElement={element} />
+                                    <CreateElement setNextFormElements={setNextFormElements} nextFormElement={element} index={
+                                        index
+                                    } />
+
+
                                 </div>
                                 <div>
                                     <button onClick={() => {
-                                        removeElement(index)
+                                        removeElement(element.elementId)
                                     }} className="p-2  text-grey rounded-md">
                                         <RiCloseCircleLine size={24} />
                                     </button>

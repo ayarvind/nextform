@@ -1,21 +1,25 @@
 import { RiAddLine } from '@remixicon/react'
-import React from 'react'
+import React, { useState } from 'react'
 import { useNextFormContext } from '~/context/useNextFormContext';
 import { NextFormElementType ,NextFormElement} from '~/types/NextFormElement'
 
 function NewElement(): React.ReactElement {
 
     const {nextFormElements,setNextFormElements} = useNextFormContext();
+    const [elementId,setElementId] = useState<number>(1);
     const pushNew = () => {
+        
         const nextForm = {
+            elementId,
             name:`untitled`,
-            type: NextFormElementType.SHORT_PARAGRAPH,
+            type: NextFormElementType.SHORT_ANSWER,
             label: `Untitled`,
             constraints: {
                 required: false
             }
 
         }
+        setElementId(elementId + 1);
         setNextFormElements([...nextFormElements,nextForm])
 
     }

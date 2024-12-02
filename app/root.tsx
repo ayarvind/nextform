@@ -1,14 +1,19 @@
 import {
+  json,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
-
+import type { LinksFunction, LoaderFunction } from "@remix-run/node";
 import "./tailwind.css";
+import { DOT_ENV } from "./client-dotenv";
+import { UserProvider } from "./context/useUserContext";
+import App from "./App";
 
+// Links for fonts and styles
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -22,7 +27,17 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+// Loader function to pass environment variables to the front-end
+export const loader: LoaderFunction = async () => {
+  return json({
+    env: DOT_ENV,
+  });
+};
+
+// Layout component for the application
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const { env } = useLoaderData<typeof loader>();
+
   return (
     <html lang="en">
       <head>
@@ -32,14 +47,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.env = ${JSON.stringify(env)};`,
+          }}
+        />
+        <UserProvider>
+          <App>{children}</App>
+          <ScrollRestoration />
+          <Outlet />
+          <Scripts />
+        </UserProvider>
       </body>
     </html>
   );
-}
-
-export default function App() {
-  return <Outlet />;
 }
